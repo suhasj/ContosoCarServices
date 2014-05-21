@@ -8,15 +8,17 @@
 		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 	</head>
 	<body>
-		<div class="jumbotron">
-			<h2>Welcome to <%= title %></h2>
-		</div>
-		<div class="row">
-			<a href="/Account/Login" class="btn btn-default">Login</a>
-		</div>
-		<div class="row"></div>
-		<div class="row">
-			<a href="/Account/Register" class="btn btn-default">Register</a>
+		<div class="container">
+			<div class="jumbotron">
+				<h2>Welcome to <%= title %></h2>
+			</div>
+			<div class="form-group">
+				<a href="/Account/Login" class="btn btn-warning btn-lg">Login</a>
+			</div>
+			<div class="row"></div>
+			<div class="form-group">
+				<a href="/Account/Register" class="btn btn-warning btn-lg">Register</a>
+			</div>
 		</div>
 	</body>
 </html>
