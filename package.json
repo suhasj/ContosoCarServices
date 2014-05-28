@@ -16,6 +16,7 @@
         "ejs": "~0.8.5",
         "passport": "0.x",
         "passport-local": "1.x",
-        "passport-facebook": "1.x"
+        "passport-facebook": "1.x",
+        "bcrypt-nodejs": "latest"
     }
 }
