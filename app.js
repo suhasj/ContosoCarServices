@@ -3,6 +3,7 @@ var path = require('path');
 var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
+var cookieSession = require('cookie-session');
 var bodyParser = require('body-parser');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
@@ -24,6 +25,9 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
+app.use(cookieSession({
+    secret: "This is awesome"
+}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(passport.initialize());

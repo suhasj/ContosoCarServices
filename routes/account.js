@@ -10,12 +10,10 @@ router.get('/Login', function(req, res) {
     });
 });
 
-router.post('/Login', function(req, res) {
-    passport.authenticate('local-login', {
-        successRedirect: '/loginSuccess',
-        failureRedirect: '/loginFailure'
-    });
-});
+router.post('/Login', passport.authenticate('local', {
+    successRedirect: '/loginSuccess',
+    failureRedirect: '/loginFailure'
+}));
 
 router.get('/loginFailure', function(req, res, next) {
     res.send('Failed to authenticate');

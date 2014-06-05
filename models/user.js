@@ -1,6 +1,7 @@
 var db = require('../models/index.js');
+var Sequelize = require('sequelize');
 
-module.exports.init = function() {
+function init(seq) {
     var User = seq.define('User', {
         username: Sequelize.STRING,
         password: Sequelize.STRING,
@@ -23,11 +24,31 @@ module.exports.init = function() {
     User.hasMany(UserClaims);
     UserClaims.belongsTo(User);
 
+    seq.authenticate()
+        .complete(function(err) {
+            if ( !! err) {
+                console.log('Connection cannot be attached', err);
+            } else {
+                console.log('Connection to db establised successfully');
+            }
+        });
+
+    seq.sync({
+        force: true
+    })
+        .complete(function(err) {
+            if ( !! err) {
+                console.log('Model syncing error', err);
+            } else {
+                console.log('Action completed');
+            }
+        });
+
     return User;
 }
 
 module.exports.Create = function(username, password) {
-    var users = User.init(seq, Sequelize);
+    var users = init(seq);
 
     var action = users.create({
         username: username,
@@ -41,7 +62,7 @@ module.exports.Create = function(username, password) {
 }
 
 module.exports.FindByEmail = function(givenEmail, givenPassword) {
-    var users = User.init(seq, Sequelize);
+    var users = init(db.seq);
 
     users.find({
         where: Sequelize.and({
@@ -49,13 +70,21 @@ module.exports.FindByEmail = function(givenEmail, givenPassword) {
         }, {
             password: givenPassword
         })
-    }).success(function(user) {
-        return user;
+    }).complete(function(err, user) {
+        if ( !! err) {
+            console.log(err);
+        } else if (!user) {
+            console.log('no user found');
+            return null;
+        } else {
+            console.log('user found');
+            return user;
+        }
     });
 }
 
 module.exports.FindById = function(givenId) {
-    var users = User.init(seq, Sequelize);
+    var users = init(seq);
 
     users.find({
         where: {
