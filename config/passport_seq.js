@@ -2,12 +2,6 @@ var LocalStrategy = require('passport-local').Strategy;
 var UserModel = require('../models/user.js');
 var Sequelize = require('sequelize');
 
-// Initialize Database object
-var seq = new Sequelize('mysql://b1aba4b5e9e72f:b33e1d07@us-cdbr-azure-west-a.cloudapp.net/ContosoCarDb', {
-    dialect: "mysql",
-    port: 3306,
-});
-
 module.exports = function(passport) {
     console.log('passport configured');
     // =========================================================================
@@ -25,9 +19,17 @@ module.exports = function(passport) {
     // used to deserialize the user
     passport.deserializeUser(function(id, done) {
         console.log('passport Serialize');
-        User.FindById(id, function(err, user) {
-            done(err, user);
+
+        var users = UserModel.Setup();
+
+        users.find({
+            where: {
+                id: id
+            }
+        }).success(function(user) {
+            done(null, user);
         });
+
     });
 
     // =========================================================================
@@ -88,19 +90,20 @@ module.exports = function(passport) {
 
                 console.log('Logging user' + email);
 
-                var users = UserModel.init(seq);
+                var users = UserModel.Setup();
 
                 users.find({
-                    where: Sequelize.and({
+                    where: {
                         email: email
-                    }, {
-                        password: password
-                    })
+                    }
                 }).success(function(user) {
                     if (!user) {
                         return done(null, false);
                     } else {
-                        return done(null, user);
+                        if (UserModel.ComparePassword(password, user.password)) {
+                            return done(null, user);
+                        }
+                        return done(null, false);
                     }
                     return user;
                 }).error(function(err) {

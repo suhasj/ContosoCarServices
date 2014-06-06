@@ -16,4 +16,11 @@ router.get('/redirect', function(req, res) {
     });
 });
 
+router.get('/Home', function(req, res, next) {
+    res.render('index', {
+        title: 'Constoso Car Services',
+        isAuthenticated: true
+    });
+});
+
 module.exports = router;

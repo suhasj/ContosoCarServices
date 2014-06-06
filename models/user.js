@@ -1,10 +1,8 @@
 var Sequelize = require('sequelize');
-var seq = new Sequelize('mysql://b1aba4b5e9e72f:b33e1d07@us-cdbr-azure-west-a.cloudapp.net/ContosoCarDb', {
-    dialect: "mysql",
-    port: 3306,
-});
+var Constants = require('../config/constants.js');
+var bcrypt = require('bcrypt-nodejs');
 
-module.exports.init = function(seq) {
+function init(seq) {
     var User = seq.define('Users', {
         username: Sequelize.STRING,
         password: Sequelize.STRING,
@@ -31,8 +29,41 @@ module.exports.init = function(seq) {
     seq.authenticate();
 
     seq.sync({
-        force: true
+        force: false
     });
 
     return User;
+}
+
+function HashPassword(password) {
+    var salt = bcrypt.genSaltSync(10);
+    // Hash the password with the salt
+    var hash = bcrypt.hashSync(password, salt);
+
+    return hash;
+}
+
+module.exports.ComparePassword = function(givePassword, actualPassword) {
+
+    return bcrypt.compareSync(givePassword, actualPassword);
+}
+
+module.exports.Setup = function() {
+    return init(Constants.seq);
+}
+
+module.exports.Create = function(givenusername, givenpassword, givenhometown, action) {
+    var users = init(Constants.seq);
+
+    var user = users.create({
+        username: givenusername,
+        email: givenusername,
+        password: HashPassword(givenpassword),
+        hometown: givenhometown
+    }).success(function(user) {
+        console.log('User created');
+        action(user);
+    })
+
+    return user;
 }
