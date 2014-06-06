@@ -12,7 +12,7 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var accounts = require('./routes/account');
 
-require('./config/passport.js')(passport);
+require('./config/passport_seq.js')(passport);
 
 var app = express();
 

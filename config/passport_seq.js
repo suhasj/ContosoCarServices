@@ -1,6 +1,12 @@
 var LocalStrategy = require('passport-local').Strategy;
+var UserModel = require('../models/user.js');
+var Sequelize = require('sequelize');
 
-var User = require('../models/user.js');
+// Initialize Database object
+var seq = new Sequelize('mysql://b1aba4b5e9e72f:b33e1d07@us-cdbr-azure-west-a.cloudapp.net/ContosoCarDb', {
+    dialect: "mysql",
+    port: 3306,
+});
 
 module.exports = function(passport) {
     console.log('passport configured');
@@ -44,16 +50,11 @@ module.exports = function(passport) {
 
                 // find a user whose email is the same as the forms email
                 // we are checking to see if the user trying to login already exists
-                User.findOne({
-                    'local.email': email
-                }, function(err, user) {
-                    // if there are any errors, return the error
-                    if (err)
-                        return done(err);
-
-                    // check to see if theres already a user with that email
+                User.FindByEmail(email, password, function(err, user) {
                     if (user) {
                         return done(null, false);
+                    } else if (err) {
+                        return done(null, err);
                     } else {
 
                         // if there is no user with that email
@@ -71,38 +72,42 @@ module.exports = function(passport) {
                             return done(null, newUser);
                         });
                     }
-
                 });
-
             });
 
         }));
 
-    passport.use(new LocalStrategy({
+    passport.use('local-login', new LocalStrategy({
             // by default, local strategy uses username and password, we will override with email
             usernameField: 'email',
             passwordField: 'password'
         },
         function(email, password, done) { // callback with email and password from our form
 
-            // process.nextTick(function() {
+            process.nextTick(function() {
 
-            console.log('Logging user' + email);
-            // find a user whose email is the same as the forms email
-            // we are checking to see if the user trying to login already exists
-            User.FindByEmail(email, password, function(err, user) {
-                // if there are any errors, return the error before anything else
-                if (err)
+                console.log('Logging user' + email);
+
+                var users = UserModel.init(seq);
+
+                users.find({
+                    where: Sequelize.and({
+                        email: email
+                    }, {
+                        password: password
+                    })
+                }).success(function(user) {
+                    if (!user) {
+                        return done(null, false);
+                    } else {
+                        return done(null, user);
+                    }
+                    return user;
+                }).error(function(err) {
                     return done(err);
+                });
 
-                // if no user is found, return the message
-                if (!user)
-                    return done(null, false); // req.flash is the way to set flashdata using connect-flash
-
-                // all is well, return successful user
-                return done(null, user);
             });
-            // });
 
         }));
 

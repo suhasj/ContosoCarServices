@@ -4,15 +4,19 @@ var passport = require('passport');
 
 /* GET users listing. */
 router.get('/Login', function(req, res) {
+    var msg = "";
+    if (req.query.q == "NotFound") {
+        msg = "User not found";
+    }
     res.render('Account/login', {
         title: 'Login',
-        message: ''
+        message: msg
     });
 });
 
-router.post('/Login', passport.authenticate('local', {
-    successRedirect: '/loginSuccess',
-    failureRedirect: '/loginFailure'
+router.post('/Login', passport.authenticate('local-login', {
+    successRedirect: '/Account/loginSuccess',
+    failureRedirect: '/Account/Login?q=NotFound'
 }));
 
 router.get('/loginFailure', function(req, res, next) {

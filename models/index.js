@@ -1,11 +1,4 @@
-var Sequelize = require('sequelize');
-
-module.exports.seq = new Sequelize('mysql://b1aba4b5e9e72f:b33e1d07@us-cdbr-azure-west-a.cloudapp.net/ContosoCarDb', {
-    dialect: "mysql",
-    port: 3306,
-});
-
-module.exports.Run = function(action) {
+module.exports.Run = function(seq, action) {
     seq.authenticate()
         .complete(function(err) {
             if ( !! err) {
