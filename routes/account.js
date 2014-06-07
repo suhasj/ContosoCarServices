@@ -11,7 +11,8 @@ router.get('/Login', function(req, res) {
     }
     res.render('Account/login', {
         title: 'Login',
-        message: msg
+        message: msg,
+        token: req.csrfToken()
     });
 });
 
@@ -35,7 +36,8 @@ router.get('/Register', function(req, res) {
 
     res.render('Account/register', {
         title: 'Register',
-        message: msg
+        message: msg,
+        token: req.csrfToken()
     });
 
 });

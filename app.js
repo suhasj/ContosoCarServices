@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var cookieSession = require('cookie-session');
 var bodyParser = require('body-parser');
+var csurf = require('csurf');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 
@@ -32,6 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(csurf());
 
 app.use('/', routes);
 app.use('/Account', accounts);
