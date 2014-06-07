@@ -18,6 +18,7 @@
         "passport": "0.x",
         "passport-local": "1.x",
         "passport-facebook": "1.x",
-        "bcrypt-nodejs": "latest"
+        "bcrypt-nodejs": "latest",
+        "sequelize":"latest"
     }
 }
