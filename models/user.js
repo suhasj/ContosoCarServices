@@ -4,10 +4,36 @@ var bcrypt = require('bcrypt-nodejs');
 
 function init(seq) {
     var User = seq.define('Users', {
-        username: Sequelize.STRING,
-        password: Sequelize.STRING,
-        hometown: Sequelize.STRING,
-        email: Sequelize.STRING
+        username: {
+            type: Sequelize.STRING,
+            unique: true
+        },
+        password: {
+            type: Sequelize.STRING,
+            validate: {
+                len: {
+                    args: [6, 100],
+                    msg: 'Password should be greater than 6 letters'
+                }
+            }
+        },
+        hometown: {
+            type: Sequelize.STRING,
+            validate: {
+                notEmpty: {
+                    msg: "Hometown cannot be null"
+                }
+            }
+        },
+        email: {
+            type: Sequelize.STRING,
+            unique: true,
+            validate: {
+                isEmail: {
+                    msg: 'Not a valid email address'
+                }
+            }
+        }
     });
     var UserLogins = seq.define('UserLogins', {
         providerkey: Sequelize.STRING,
@@ -63,7 +89,7 @@ module.exports.Create = function(givenusername, givenpassword, givenhometown, ac
     }).success(function(user) {
         console.log('User created');
         action(user);
+    }).error(function(err) {
+        action(err);
     })
-
-    return user;
 }

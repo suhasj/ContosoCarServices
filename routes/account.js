@@ -43,11 +43,31 @@ router.get('/Register', function(req, res) {
 router.post('/Register', function(req, res) {
 
     var user = UserModel.Create(req.body.email, req.body.password, req.body.hometown, function(user) {
-        if (!user) {
-            res.redirect('/Register?q=CreateFailed');
+        if (user.hasOwnProperty('dataValues')) {
+            res.redirect('/Home');
+        } else {
+            var msg = '';
+
+            var keys = [
+                'email',
+                'password',
+                'username'
+            ];
+
+            for (var i = 0; i < keys.length; i++) {
+                if (user.hasOwnProperty(keys[i])) {
+                    msg += user[keys[i]].toString();
+                }
+                msg += ";";
+            }
+
+            // Redirect to Register page with errors
+            res.render('Account/register', {
+                title: 'Register',
+                message: msg
+            });
         }
 
-        res.redirect('/Home');
     });
 
 
