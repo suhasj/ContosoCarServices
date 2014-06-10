@@ -13,6 +13,9 @@
 				<h2>Welcome to <%= title %></h2>
 			</div>
 			<%  if(locals.isAuthenticated){ %>
+			<div class="nav navbar-right">
+				<a href="/Account/Logout"> Logout</a>
+			</div>
 			<h4> You have successfully logged in </h4>
 			<% } else { %>
 			<div class="form-group">

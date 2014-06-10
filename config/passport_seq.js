@@ -13,18 +13,22 @@ module.exports = function(passport) {
     // used to serialize the user for the session
     passport.serializeUser(function(user, done) {
         console.log('passport Serialize');
-        done(null, user.id);
+        done(null, {
+            id: user.id,
+            username: user.username,
+            hometown: user.hometown
+        });
     });
 
     // used to deserialize the user
-    passport.deserializeUser(function(id, done) {
+    passport.deserializeUser(function(user, done) {
         console.log('passport Serialize');
 
         var users = UserModel.Setup();
 
         users.find({
             where: {
-                id: id
+                id: user.id
             }
         }).success(function(user) {
             done(null, user);

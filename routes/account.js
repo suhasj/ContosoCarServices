@@ -16,8 +16,13 @@ router.get('/Login', function(req, res) {
     });
 });
 
+router.get("/Logout", function(req, res) {
+    req.logout();
+    res.redirect('/');
+});
+
 router.post('/Login', passport.authenticate('local-login', {
-    successRedirect: '/Home',
+    successRedirect: '/',
     failureRedirect: '/Account/Login?q=NotFound'
 }));
 
@@ -66,7 +71,8 @@ router.post('/Register', function(req, res) {
             // Redirect to Register page with errors
             res.render('Account/register', {
                 title: 'Register',
-                message: msg
+                message: msg,
+                token: req.csrfToken()
             });
         }
 
