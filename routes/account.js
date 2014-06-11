@@ -77,8 +77,20 @@ router.post('/Register', function(req, res) {
         }
 
     });
+});
 
-
+router.get('/Manage', function(req, res) {
+    if (!req.isAuthenticated()) {
+        res.redirect("/Account/Login");
+        return;
+    }
+    var msg = "";
+    res.render('Account/manage', {
+        title: "Manage",
+        username: req.user.username,
+        message: msg,
+        token: req.csrfToken()
+    });
 });
 
 module.exports = router;

@@ -6,7 +6,8 @@ router.get('/', function(req, res) {
     if (req.isAuthenticated()) {
         res.render('index', {
             title: 'Constoso Car Services',
-            isAuthenticated: true
+            isAuthenticated: true,
+            username: req.user.username
         });
     } else {
         res.render('index', {

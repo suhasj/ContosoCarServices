@@ -9,15 +9,20 @@
 	</head>
 	<body>
 		<div class="container">
+			
+			<%  if(locals.isAuthenticated){ %>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="/Account/Manage">Hello! <%= username %></a></li>
+				<li><a href="/Account/Logout">Logout</a></li>
+			</ul>
 			<div class="jumbotron">
 				<h2>Welcome to <%= title %></h2>
 			</div>
-			<%  if(locals.isAuthenticated){ %>
-			<div class="nav navbar-right">
-				<a href="/Account/Logout"> Logout</a>
-			</div>
 			<h4> You have successfully logged in </h4>
 			<% } else { %>
+			<div class="jumbotron">
+				<h2>Welcome to <%= title %></h2>
+			</div>
 			<div class="form-group">
 				<h4>Login in to the application to access inventory</h4>
 			</div>
