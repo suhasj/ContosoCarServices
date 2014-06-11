@@ -49,23 +49,41 @@ router.get('/Register', function(req, res) {
 
 router.post('/Register', function(req, res) {
 
-    var user = UserModel.Create(req.body.email, req.body.password, req.body.hometown, function(user) {
-        if (user.hasOwnProperty('dataValues')) {
-            res.redirect('/Home');
+    var user = UserModel.Create(req.body.email, req.body.password, req.body.hometown, function(user, err) {
+        if (user) {
+            req.logIn(user, function(err) {
+                if (err) return next(err);
+                // login success!
+                res.redirect('/'); // or whereever
+            });
         } else {
+
+            if (err.hasOwnProperty('message')) {
+                console.log(err.message);
+                // Redirect to Register page with errors
+                res.render('Account/register', {
+                    title: 'Register',
+                    message: err.message,
+                    token: req.csrfToken()
+                });
+
+                return;
+            }
+
             var msg = '';
 
             var keys = [
                 'email',
                 'password',
-                'username'
+                'username',
+                'hometown'
             ];
 
             for (var i = 0; i < keys.length; i++) {
-                if (user.hasOwnProperty(keys[i])) {
-                    msg += user[keys[i]].toString();
+                if (err.hasOwnProperty(keys[i])) {
+                    msg += err[keys[i]].toString();
+                    msg += ";";
                 }
-                msg += ";";
             }
 
             // Redirect to Register page with errors

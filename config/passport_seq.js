@@ -36,53 +36,7 @@ module.exports = function(passport) {
 
     });
 
-    // =========================================================================
-    // LOCAL SIGNUP ============================================================
-    // =========================================================================
-    // we are using named strategies since we have one for login and one for signup
-    // by default, if there was no name, it would just be called 'local'
-
-    passport.use('local-signup', new LocalStrategy({
-            // by default, local strategy uses username and password, we will override with email
-            usernameField: 'email',
-            passwordField: 'password',
-            passReqToCallback: true // allows us to pass back the entire request to the callback
-        },
-        function(email, password, done) {
-
-            // asynchronous
-            // User.findOne wont fire unless data is sent back
-            process.nextTick(function() {
-
-                // find a user whose email is the same as the forms email
-                // we are checking to see if the user trying to login already exists
-                User.FindByEmail(email, password, function(err, user) {
-                    if (user) {
-                        return done(null, false);
-                    } else if (err) {
-                        return done(null, err);
-                    } else {
-
-                        // if there is no user with that email
-                        // create the user
-                        var newUser = new User();
-
-                        // set the user's local credentials
-                        newUser.local.email = email;
-                        newUser.local.password = newUser.generateHash(password);
-
-                        // save the user
-                        newUser.save(function(err) {
-                            if (err)
-                                throw err;
-                            return done(null, newUser);
-                        });
-                    }
-                });
-            });
-
-        }));
-
+    // Passport strategy to login users
     passport.use('local-login', new LocalStrategy({
             // by default, local strategy uses username and password, we will override with email
             usernameField: 'email',

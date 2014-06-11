@@ -7,7 +7,8 @@ router.get('/', function(req, res) {
         res.render('index', {
             title: 'Constoso Car Services',
             isAuthenticated: true,
-            username: req.user.username
+            username: req.user.username,
+            hometown: req.user.hometown
         });
     } else {
         res.render('index', {

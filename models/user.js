@@ -14,7 +14,8 @@ function init(seq) {
                 len: {
                     args: [6, 100],
                     msg: 'Password should be greater than 6 letters'
-                }
+                },
+                notEmpty: true
             }
         },
         hometown: {
@@ -88,8 +89,8 @@ module.exports.Create = function(givenusername, givenpassword, givenhometown, ac
         hometown: givenhometown
     }).success(function(user) {
         console.log('User created');
-        action(user);
+        action(user, null);
     }).error(function(err) {
-        action(err);
+        action(null, err);
     })
 }
