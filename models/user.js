@@ -15,7 +15,7 @@ function init(seq) {
                     args: [6, 100],
                     msg: 'Password should be greater than 6 letters'
                 },
-                notEmpty: true
+                notEmpty: false
             }
         },
         hometown: {
@@ -59,7 +59,9 @@ function init(seq) {
         force: false
     });
 
-    return User;
+    var objs = [User, UserLogins, UserClaims];
+
+    return objs;
 }
 
 function HashPassword(password) {
@@ -80,7 +82,7 @@ module.exports.Setup = function() {
 }
 
 module.exports.Create = function(givenusername, givenpassword, givenhometown, action) {
-    var users = init(Constants.seq);
+    var users = init(Constants.seq)[0];
 
     var user = users.create({
         username: givenusername,
@@ -90,6 +92,32 @@ module.exports.Create = function(givenusername, givenpassword, givenhometown, ac
     }).success(function(user) {
         console.log('User created');
         action(user, null);
+    }).error(function(err) {
+        action(null, err);
+    })
+}
+
+module.exports.CreateWithLogin = function(givenusername, givenhometown, loginprovider, providerkey, action) {
+    var objs = init(Constants.seq);
+    var users = objs[0];
+    var userlogins = objs[1];
+
+    users.create({
+        username: givenusername,
+        email: givenusername,
+        hometown: givenhometown,
+        password: HashPassword('ASP+Rocks4U')
+    }).success(function(user) {
+        console.log('User created');
+        var userlogin = userlogins.create({
+            providerkey: providerkey,
+            loginprovider: loginprovider
+        }).success(function(createdlogin) {
+            user.setUserLogins([createdlogin]).success(function() {
+                Constants.seq.sync();
+                action(user, null);
+            });
+        })
     }).error(function(err) {
         action(null, err);
     })
