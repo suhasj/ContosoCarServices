@@ -10,6 +10,8 @@ To run it on a clean machine
   This installs nodemon globally
 - npm install -g node-inspector 
   This is optional. This installs node-inspector that can be used for debugging
+- npm install -g sequelize
+  This installs Sequelize globally as there some issues installing Sequelize locally
 
 - Clone the repository
 - Navigate to the root and say 'npm install' to restore all modules
