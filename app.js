@@ -8,10 +8,13 @@ var bodyParser = require('body-parser');
 var csurf = require('csurf');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var authorize = require('./config/auth.js').Authorize;
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var accounts = require('./routes/account');
+var products = require('./routes/product');
+
 
 require('./config/passport_seq.js')(passport);
 
@@ -28,17 +31,35 @@ app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(cookieSession({
     secret: "This is awesome"
+
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(passport.initialize());
+/*app.use(function(req, res, next) {
+    if (req.method == 'POST' && req.url == '/Account/Login') {
+        if (req.body.rememberme) {
+            req.session.cookie.maxAge = 1000 * 60 * 3;
+        } else {
+            req.session.cookie.expires = false;
+        }
+    }
+    next();
+});*/
+
+app.use(passport.initialize({
+    userProperty: 'currentUser'
+}));
 app.use(passport.session());
 app.use(csurf());
 
+app.use(authorize.middleware());
+app.all('/Inventory', authorize.is('Authenticated'));
+
 app.use('/', routes);
 app.use('/Account', accounts);
+app.use('/Inventory', products);
 
-/// catch 404 and forward to error handler
+// catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
@@ -68,6 +89,5 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
-
 
 module.exports = app;

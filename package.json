@@ -20,6 +20,8 @@
         "passport-facebook": "1.x",
         "bcrypt-nodejs": "latest",
         "sequelize": "latest",
-        "csurf": "latest"
+        "csurf": "latest",
+        "passport-remember-me": "latest",
+        "connect-roles": "latest"
     }
 }

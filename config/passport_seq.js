@@ -1,4 +1,5 @@
 var LocalStrategy = require('passport-local').Strategy;
+var FacebookStrategy = require('passport-facebook').Strategy;
 var UserModel = require('../models/user.js');
 var Sequelize = require('sequelize');
 
@@ -13,23 +14,35 @@ module.exports = function(passport) {
     // used to serialize the user for the session
     passport.serializeUser(function(user, done) {
         console.log('passport Serialize');
+
         done(null, {
             id: user.id,
             username: user.username,
-            hometown: user.hometown
+            hometown: user.hometown,
+            claims: user.userClaims
         });
     });
 
     // used to deserialize the user
     passport.deserializeUser(function(user, done) {
-        console.log('passport Serialize');
+        console.log('passport Deserialize');
 
-        var users = UserModel.Setup();
+        if (!user.id) {
+            done(null, user);
+            return;
+        }
+        var userModels = UserModel.Setup();
+        var users = userModels[0];
 
         users.find({
             where: {
                 id: user.id
-            }
+            },
+            include: [{
+                model: userModels[2]
+            }, {
+                model: userModels[1]
+            }]
         }).success(function(user) {
             done(null, user);
         });
@@ -48,7 +61,7 @@ module.exports = function(passport) {
 
                 console.log('Logging user' + email);
 
-                var users = UserModel.Setup();
+                var users = UserModel.Setup()[0];
 
                 users.find({
                     where: {
@@ -71,5 +84,44 @@ module.exports = function(passport) {
             });
 
         }));
+
+    passport.use(new FacebookStrategy({
+
+        clientID: '354209461309583',
+        clientSecret: '1856b2f01b3f361c9b235e686923bb6b',
+        callbackURL: 'http://localhost:3000/Account/Login/Facebook/callback',
+        passReqToCallback: true
+    }, function(req, accessToken, refreshToken, profile, done) {
+
+        process.nextTick(function() {
+
+            console.log('Logging with Facebook');
+            var userModels = UserModel.Setup();
+            var userLogins = userModels[1];
+            var users = userModels[0];
+
+            var email = profile.emails[0].value;
+
+            userLogins.find({
+                where: {
+                    providerkey: profile.id
+                },
+                include: [{
+                    model: users
+                }]
+            }).success(function(userlogin) {
+                if (!userlogin) {
+                    UserModel.CreateWithLogin(email, profile._json.hometown.name, 'facebook', profile.id, function(newUser, err) {
+                        return done(null, newUser);
+                    });
+                } else {
+                    return done(null, userlogin.user);
+                }
+            }).error(function(err) {
+                return done(err);
+            })
+
+        });
+    }));
 
 }

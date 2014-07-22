@@ -10,28 +10,56 @@
 	<body>
 		
 		<div class="container">
-			<div class="col-sm-6 col-sm-offset-3">
+			<div class="container body-content">
 				<h1><span class="fa fa-sign-in"></span> Login</h1>
+				<hr/>
 				<!-- show any messages that come back with authentication -->
 				<% if (message.length > 0) { %>
 				<div class="alert alert-danger"><%= message %></div>
 				<% } %>
-				<!-- LOGIN FORM -->
-				<form action="/Account/Login" method="post">
-					<input type="hidden" name="_csrf" value= "<%= token %>" />
-					<div class="form-group">
-						<label>Email</label>
-						<input type="text" class="form-control" name="email">
+				<div class="col-lg-4">
+					<div class="form-horizontal">
+						<!-- LOGIN FORM -->
+						<form action="/Account/Login" method="post">
+							<input type="hidden" name="_csrf" value= "<%= token %>" />
+							<div class="form-group">
+								<label>Email</label>
+								<input type="text" class="form-control" name="email">
+							</div>
+							<div class="form-group">
+								<label>Password</label>
+								<input type="password" class="form-control" name="password">
+							</div>
+							<div class="form-group">
+								<div class="checkbox">
+									<input type="checkbox" name="rememberme"/>
+									<label>Remember me</label>
+								</div>
+							</div>
+							<div class="form-group">
+								<button type="submit" class="btn btn-warning">Login</button>
+							</div>
+							<div class="form-group">
+								<p>Need an account? <a href="/Account/Register">Signup</a></p>
+								<p>Or go <a href="/">home</a>.</p>
+							</div>
+						</form>
+						
 					</div>
-					<div class="form-group">
-						<label>Password</label>
-						<input type="password" class="form-control" name="password">
+				</div>
+				<div class="col-lg-4">
+				</div>
+				<div class="col-lg-4">
+					<div class="form-horizontal">
+						<form action="/Account/Login/Facebook" method="post">
+							<div class="form-group ">
+								<h4>Log in with external provider</h4>
+								<input type="hidden" name="_csrf" value= "<%= token %>" />
+								<button type="submit" class="btn btn-warning">Facebook</button>
+							</div>
+						</form>
 					</div>
-					<button type="submit" class="btn btn-warning btn-lg">Login</button>
-				</form>
-				<hr>
-				<p>Need an account? <a href="/Account/Register">Signup</a></p>
-				<p>Or go <a href="/">home</a>.</p>
+				</div>
 			</div>
 		</div>
 	</body>
