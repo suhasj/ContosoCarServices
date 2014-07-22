@@ -22,6 +22,7 @@
         "sequelize": "latest",
         "csurf": "latest",
         "passport-remember-me": "latest",
-        "connect-roles": "latest"
+        "connect-roles": "latest",
+        "passport-totp": "0.x"
     }
 }
