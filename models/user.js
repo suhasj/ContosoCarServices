@@ -1,6 +1,7 @@
 var Sequelize = require('sequelize');
 var Constants = require('../config/constants.js');
 var bcrypt = require('bcrypt-nodejs');
+var uuid = require('node-uuid');
 
 function init(seq) {
     var User = seq.define('Users', {
@@ -34,19 +35,32 @@ function init(seq) {
                     msg: 'Not a valid email address'
                 }
             }
+        },
+        totpKey: {
+            type: Sequelize.STRING,
+            unique: true
+        },
+        twoFactorEnabled: {
+            type: Sequelize.BOOLEAN
         }
+    }, {
+        tableName: 'Users'
     });
+
     var UserLogins = seq.define('UserLogins', {
         providerkey: Sequelize.STRING,
         loginprovider: Sequelize.STRING
     }, {
-        timestamps: false
+        timestamps: false,
+        tableName: 'UserLogins'
     });
+
     var UserClaims = seq.define('UserClaims', {
         claimtype: Sequelize.STRING,
         claimvalue: Sequelize.STRING
     }, {
-        timestamps: false
+        timestamps: false,
+        tableName: 'UserClaims'
     });
     User.hasMany(UserLogins);
     UserLogins.belongsTo(User);
@@ -121,4 +135,41 @@ module.exports.CreateWithLogin = function(givenusername, givenhometown, loginpro
     }).error(function(err) {
         action(null, err);
     })
+}
+
+module.exports.GetTotpKeyForUser = function(userId, action) {
+    var users = init(Constants.seq)[0];
+
+    users.find({
+        where: {
+            id: userId
+        }
+    }).success(function(user) {
+        if (!user.totpKey) {
+            var key = uuid.v4();
+            user.totpKey = key;
+            user.save().success(function() {
+                action(key, null);
+            })
+        } else {
+            action(user.totpKey, null);
+        }
+    }).error(function(err) {
+        action(null, err);
+    });
+
+}
+
+module.exports.GetUserById = function(userId, action) {
+    var users = init(Constants.seq)[0];
+
+    users.find({
+        where: {
+            id: userId
+        }
+    }).success(function(user) {
+        action(user, null)
+    }).error(function(err) {
+        action(null, err);
+    });
 }

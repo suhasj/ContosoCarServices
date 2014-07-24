@@ -1,5 +1,6 @@
 var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
+var TotpStrategy = require('passport-totp').Strategy;
 var UserModel = require('../models/user.js');
 var Sequelize = require('sequelize');
 
@@ -19,6 +20,7 @@ module.exports = function(passport) {
             id: user.id,
             username: user.username,
             hometown: user.hometown,
+            twoFactorEnabled: user.twoFactorEnabled,
             claims: user.userClaims
         });
     });
@@ -121,6 +123,15 @@ module.exports = function(passport) {
                 return done(err);
             })
 
+        });
+    }));
+
+    passport.use(new TotpStrategy(function(user, done) {
+        UserModel.GetTotpKeyForUser(user.id, function(key, err) {
+            if (err) {
+                return done(err);
+            }
+            return done(null, key, 30);
         });
     }));
 

@@ -3,6 +3,7 @@ var router = express.Router();
 var passport = require('passport');
 var UserModel = require('../models/user.js');
 var authorize = require('../config/auth.js').Authorize;
+var base32 = require('thirty-two');
 
 /* GET users listing. */
 router.get('/Login', function(req, res) {
@@ -27,7 +28,7 @@ router.get("/Logout", function(req, res) {
 });
 
 router.post('/Login', passport.authenticate('local-login', {
-    successRedirect: '/',
+    successRedirect: '/Account/EnterCode',
     failureRedirect: '/Account/Login?q=NotFound'
 }));
 
@@ -140,61 +141,58 @@ router.get('/RegisterExternalLogin', function(req, res) {
 
 });
 
-router.post('Account/registerexternallogin', function(req, res) {
-    var user = UserModel.Create(req.body.email, req.body.password, req.body.hometown, function(user, err) {
-        if (user) {
-            req.logIn(user, function(err) {
-                if (err) return next(err);
-                // login success!
-                res.redirect('/'); // or whereever
-            });
-        } else {
+router.get("/AddAuthenticator", function(req, res) {
+    UserModel.GetTotpKeyForUser(req.currentUser.id, function(key, err) {
+        if (err) {
+            return next(err);
+        }
+        if (key) {
+            // two-factor auth has already been setup
+            var encodedKey = base32.encode(key);
 
-            if (err.hasOwnProperty('message')) {
-                console.log(err.message);
-                // Redirect to Register page with errors
-                res.render('Account/registerexternallogin', {
-                    title: "Create account",
-                    useremail: err.message,
-                    token: req.csrfToken(),
-                    message: msg
-                });
+            // generate QR code for scanning into Google Authenticator
+            // reference: https://code.google.com/p/google-authenticator/wiki/KeyUriFormat
+            var otpUrl = 'otpauth://totp/' + req.currentUser.username + '?secret=' + encodedKey;
+            var qrImage = 'https://chart.googleapis.com/chart?chs=166x166&chld=L|0&cht=qr&chl=' + encodeURIComponent(otpUrl);
 
-                return;
-            }
-
-            var msg = '';
-
-            var keys = [
-                'email',
-                'password',
-                'username',
-                'hometown'
-            ];
-
-            for (var i = 0; i < keys.length; i++) {
-                if (err.hasOwnProperty(keys[i])) {
-                    msg += err[keys[i]].toString();
-                    msg += ";";
-                }
-            }
-
-            // Redirect to Register page with errors
-            res.render('Account/registerexternallogin', {
-                title: "Create account",
-                useremail: req.user.username,
+            res.render('Account/totpsetup', {
                 token: req.csrfToken(),
-                message: msg
+                key: encodedKey,
+                qrImage: qrImage,
+                title: "Add Authenticator",
+                message: ""
             });
         }
     });
 });
 
-router.get("/AdminHome", authorize.is('Admin'), function(req, res) {
-    res.render('Account/adminhome', {
-        title: "Admin page"
+router.post("/AddAuthenticator", authorize.is('Authenticated'),
+    passport.authenticate('totp', {
+        failureRedirect: '/Account/AddAuthenticator?q=InvalidCode'
+    }), function(req, res) {
+        res.redirect('/');
     });
+
+router.get("/EnterCode", authorize.is('Authenticated'), function(req, res) {
+    if (!req.currentUser.twoFactorEnabled) {
+        res.redirect('/');
+    } else {
+        var user = UserModel.GetUserById(req.currentUser.id, function(user, err) {
+            res.render('Account/login-otp', {
+                token: req.csrfToken(),
+                title: "Enter Code",
+                message: ""
+            });
+        });
+    }
 });
 
+router.post("/EnterCode", authorize.is('Authenticated'),
+    passport.authenticate('totp', {
+        failureRedirect: '/Account/EnterCode'
+    }), function(req, res) {
+        req.session.authFactors = ['totp'];
+        res.redirect('/');
+    });
 
 module.exports = router;

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title><%= title %></title>
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css" />
+		<link rel='stylesheet' href='/stylesheets/style.css' />
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+		
+		<div class="container">
+			<div class="container body-content">
+				<div class="col-md-4">
+				<h3>Login</h3>
+					<form action="/Account/EnterCode" method="post">
+					<input type="hidden" name="_csrf" value= "<%= token %>" />
+					<div class="form-group">
+						<label>Enter code</label>
+						<input type="text" class="form-control" name="code"/>
+					</div>
+					<div class="form-group">
+						<input type="submit" class="btn btn-warning"/>
+					</div>
+				</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -23,6 +23,8 @@
         "csurf": "latest",
         "passport-remember-me": "latest",
         "connect-roles": "latest",
-        "passport-totp": "0.x"
+        "passport-totp": "0.x",
+        "thirty-two": "0.0.x",
+        "node-uuid": "1.4.1"
     }
 }
