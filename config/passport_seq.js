@@ -3,6 +3,7 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 var TotpStrategy = require('passport-totp').Strategy;
 var UserModel = require('../models/user.js');
 var Sequelize = require('sequelize');
+var MaxNumberOfAttempts = 3;
 
 module.exports = function(passport) {
     console.log('passport configured');
@@ -76,9 +77,23 @@ module.exports = function(passport) {
                         if (UserModel.ComparePassword(password, user.password)) {
                             return done(null, user);
                         }
-                        return done(null, false);
+                        // Check if user is locked out
+                        var q = "";
+                        if (user.numberOfAttempts++ >= MaxNumberOfAttempts) {
+                            user.lockoutWindow = (new Date()).getDate() + 1;
+                            user.numberOfAttempts == 0;
+                            q = 'UserLocked'
+                        } else {
+                            q = 'NotFound'
+                        }
+
+                        user.save().success(function() {})
+
+                        return done(null, false, {
+                            result: q
+                        });
                     }
-                    return user;
+
                 }).error(function(err) {
                     return done(err);
                 });

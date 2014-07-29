@@ -3,17 +3,12 @@ var router = express.Router();
 var passport = require('passport');
 var UserModel = require('../models/user.js');
 var authorize = require('../config/auth.js').Authorize;
+var MessageDictionary = require('../config/errorMsg.js').MessageDictionary;
 var base32 = require('thirty-two');
 
 /* GET users listing. */
 router.get('/Login', function(req, res) {
-    var msg = "";
-
-    if (req.query.q == "NotFound") {
-        msg = "User not found";
-    } else if (req.query.q == "CannotLoginWithFacebook") {
-        msg = "Cannot login with Facebook";
-    }
+    var msg = MessageDictionary[req.query.q] == undefined ? "" : MessageDictionary[req.query.q];
 
     res.render('Account/login', {
         title: 'Login',
@@ -27,18 +22,26 @@ router.get("/Logout", function(req, res) {
     res.redirect('/');
 });
 
-router.post('/Login', passport.authenticate('local-login', {
-    successRedirect: '/Account/EnterCode',
-    failureRedirect: '/Account/Login?q=NotFound'
-}));
+router.post('/Login', function(req, res, next) {
+    passport.authenticate('local-login', function(err, user, info) {
+        if (err) {
+            return next(err);
+        }
+        if (!user) {
+            return res.redirect('/Account/Login?q=' + info.result);
+        }
+        req.logIn(user, function(err) {
+            if (err) {
+                return next(err);
+            }
+            return res.redirect('/Account/EnterCode');
+        });
+    })(req, res, next);
+});
 
 
 router.get('/Register', function(req, res) {
-    var msg = "";
-
-    if (req.query.q == "CreateFailed") {
-        msg = "Cannot create user. Please try again";
-    }
+    var msg = MessageDictionary[req.query.q] == undefined ? "" : MessageDictionary[req.query.q];
 
     res.render('Account/register', {
         title: 'Register',

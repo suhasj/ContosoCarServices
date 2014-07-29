@@ -42,26 +42,35 @@ function init(seq) {
         },
         twoFactorEnabled: {
             type: Sequelize.BOOLEAN
+        },
+        accountLockoutEnabled: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: true
+        },
+        numberOfAttempts: {
+            type: Sequelize.INTEGER,
+            defaultValue: 0
+        },
+        lockoutWindow: {
+            type: Sequelize.DATE,
+            defaultValue: Sequelize.NOW
         }
-    }, {
-        tableName: 'Users'
     });
 
     var UserLogins = seq.define('UserLogins', {
         providerkey: Sequelize.STRING,
         loginprovider: Sequelize.STRING
     }, {
-        timestamps: false,
-        tableName: 'UserLogins'
+        timestamps: false
     });
 
     var UserClaims = seq.define('UserClaims', {
         claimtype: Sequelize.STRING,
         claimvalue: Sequelize.STRING
     }, {
-        timestamps: false,
-        tableName: 'UserClaims'
+        timestamps: false
     });
+
     User.hasMany(UserLogins);
     UserLogins.belongsTo(User);
     User.hasMany(UserClaims);
