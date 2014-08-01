@@ -10,7 +10,17 @@
 	<body>
 		
 		<div class="container">
+			<ul class="nav navbar-nav navbar-right">
+				<li><a href="/Account/Manage">Hello! <%= username %></a></li>
+				<li><a href="/Account/Logout">Logout</a></li>
+			</ul>
+			<div>
+				<ul class="nav navbar-nav navbar-left">
+					<li><a href="/">Home</a></li>
+				</ul>
+			</div>
 			<div class="col-sm-6 col-sm-offset-3">
+				
 				<h1><span class="fa fa-sign-in"></span>Manage user</h1>
 				<!-- show any messages that come back with authentication -->
 				<% if (message.length > 0) { %>
@@ -18,31 +28,45 @@
 				<% } %>
 				<div class="form-group">
 					<h4>You are logged in as <%= username %></h4>
-				<div>
-					<hr/>
-				<!-- Manage FORM -->
-				<form action="/Account/Manage" method="post">
-					<input type="hidden" name="_csrf" value= "<%= token %>" />
-					<div class="form-group">
-						<label>Old Password</label>
-						<input type="password" class="form-control" name="oldpassword">
+					<div>
+						<hr/>
+						<!-- Manage FORM -->
+						<form action="/Account/Manage" method="post">
+							<input type="hidden" name="_csrf" value= "<%= token %>" />
+							<div class="form-group">
+								<label>Old Password</label>
+								<input type="password" class="form-control" name="oldpassword">
+							</div>
+							<div class="form-group">
+								<label>New Password</label>
+								<input type="password" class="form-control" name="newpassword">
+							</div>
+							<div class="form-group">
+								<label>Confirm New Password</label>
+								<input type="password" class="form-control" name="confirmnewpassword">
+							</div>
+							<button type="submit" class="btn btn-warning">Change Password</button>
+						</form>
+						<hr/>
+						<div>
+							<% if(twoFactorEnabled){ %>
+							<div>
+								<h5>Disable Two Factor Authentication</h5>
+								<a href="/Account/DisableTwoFactorAuth" class="btn btn-warning btn-sm">Disable</a>
+							</div>
+							
+							<%}else{%>
+							<div>
+								<h5>Enable Two Factor Authentication</h5>
+								<a href="/Account/EnableTwoFactorAuth" class="btn btn-warning btn-sm">Enable</a>
+							</div>
+							<%}%>
+							<br/><div>
+								<h5>Need to Setup Authenticator app</h5>
+								<a href="/Account/AddAuthenticator" class="btn btn-warning btn-sm">Setup</a>
+							</div>
+						</div>
 					</div>
-					<div class="form-group">
-						<label>New Password</label>
-						<input type="password" class="form-control" name="newpassword">
-					</div>
-					<div class="form-group">
-						<label>Confirm New Password</label>
-						<input type="password" class="form-control" name="confirmnewpassword">
-					</div>
-					<button type="submit" class="btn btn-warning">Change Password</button>
-				</form>
-				<hr/>
-				<div>
-					<h4>Enable two factor authentication</h4>
-					<a href="/Account/AddAuthenticator" class="btn btn-warning btn-lg">Add Google Authenticator</a>
 				</div>
-			</div>
-		</div>
-	</body>
-</html>
+			</body>
+		</html>

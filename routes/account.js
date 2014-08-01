@@ -106,12 +106,13 @@ router.get('/Manage', function(req, res) {
         res.redirect("/Account/Login");
         return;
     }
-    var msg = "";
+    var msg = MessageDictionary[req.query.q] == undefined ? "" : MessageDictionary[req.query.q];
     res.render('Account/manage', {
         title: "Manage",
         username: req.currentUser.username,
         message: msg,
-        token: req.csrfToken()
+        token: req.csrfToken(),
+        twoFactorEnabled: req.currentUser.twoFactorEnabled
     });
 });
 
@@ -126,8 +127,8 @@ router.post('/Login/Facebook', passport.authenticate('facebook', {
 // handle the callback after facebook has authenticated the user
 router.get('/Login/Facebook/callback',
     passport.authenticate('facebook', {
-        successRedirect: '/',
-        failureRedirect: '/Account/Login?q=CannotLoginWithFacebook'
+    successRedirect: '/',
+    failureRedirect: '/Account/Login?q=CannotLoginWithFacebook'
     }));
 
 router.get('/RegisterExternalLogin', function(req, res) {
@@ -197,5 +198,25 @@ router.post("/EnterCode", authorize.is('Authenticated'),
         req.session.authFactors = ['totp'];
         res.redirect('/');
     });
+
+router.get("/EnableTwoFactorAuth", authorize.is('Authenticated'), function(req, res) {
+    UserModel.ToggleTwoFactorAuthForUser(req.currentUser.id, true, function(err) {
+        if (err) {
+            res.redirect('/Account/Manage?q=CannotEnableTwoFactorAuth');
+        }
+
+        res.redirect('/Account/Manage');
+    })
+});
+
+router.get("/DisableTwoFactorAuth", authorize.is('Authenticated'), function(req, res) {
+    UserModel.ToggleTwoFactorAuthForUser(req.currentUser.id, false, function(err) {
+        if (err) {
+            res.redirect('/Account/Manage?q=CannotDisableTwoFactorAuth');
+        }
+
+        res.redirect('/Account/Manage');
+    })
+});
 
 module.exports = router;

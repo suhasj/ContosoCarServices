@@ -41,7 +41,8 @@ function init(seq) {
             unique: true
         },
         twoFactorEnabled: {
-            type: Sequelize.BOOLEAN
+            type: Sequelize.BOOLEAN,
+            defaultValue: true
         },
         accountLockoutEnabled: {
             type: Sequelize.BOOLEAN,
@@ -180,5 +181,22 @@ module.exports.GetUserById = function(userId, action) {
         action(user, null)
     }).error(function(err) {
         action(null, err);
+    });
+}
+
+module.exports.ToggleTwoFactorAuthForUser = function(userId, flag, action) {
+    var users = init(Constants.seq)[0];
+
+    users.find({
+        where: {
+            id: userId
+        }
+    }).success(function(user) {
+        user.twoFactorEnabled = flag;
+        user.save().success(function() {
+            action(null);
+        })
+    }).error(function(err) {
+        action(err);
     });
 }

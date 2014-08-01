@@ -4,6 +4,7 @@ var TotpStrategy = require('passport-totp').Strategy;
 var UserModel = require('../models/user.js');
 var Sequelize = require('sequelize');
 var MaxNumberOfAttempts = 3;
+var LockoutTimeLimitInMinutes = 5;
 
 module.exports = function(passport) {
     console.log('passport configured');
@@ -74,23 +75,28 @@ module.exports = function(passport) {
                     if (!user) {
                         return done(null, false);
                     } else {
-                        if (UserModel.ComparePassword(password, user.password)) {
+                        if (UserModel.ComparePassword(password, user.password) && user.lockoutWindow < (new Date())) {
+
                             return done(null, user);
                         }
                         // Check if user is locked out
                         var q = "";
+
                         if (user.numberOfAttempts++ >= MaxNumberOfAttempts) {
-                            user.lockoutWindow = (new Date()).getDate() + 1;
-                            user.numberOfAttempts == 0;
+                            var now = new Date();
+                            now.setMinutes(now.getMinutes() + LockoutTimeLimitInMinutes);
+
+                            user.lockoutWindow = now;
+                            user.numberOfAttempts = 0;
                             q = 'UserLocked'
                         } else {
                             q = 'NotFound'
                         }
 
-                        user.save().success(function() {})
-
-                        return done(null, false, {
-                            result: q
+                        user.save().success(function() {
+                            return done(null, false, {
+                                result: q
+                            });
                         });
                     }
 
@@ -132,7 +138,26 @@ module.exports = function(passport) {
                         return done(null, newUser);
                     });
                 } else {
-                    return done(null, userlogin.user);
+                    if (userlogin.user.lockoutWindow < (new Date())) {
+                        return done(null, userlogin.user);
+                    }
+
+                    if (userlogin.user.numberOfAttempts >= MaxNumberOfAttempts) {
+                        var now = new Date();
+                        now.setMinutes(now.getMinutes() + LockoutTimeLimitInMinutes);
+
+                        userlogin.user.lockoutWindow = now;
+                        userlogin.user.numberOfAttempts = 0;
+                        q = 'UserLocked'
+                    } else {
+                        q = 'NotFound'
+                    }
+
+                    userlogin.user.save().success(function() {
+                        return done(null, false, {
+                            result: q
+                        });
+                    });
                 }
             }).error(function(err) {
                 return done(err);
